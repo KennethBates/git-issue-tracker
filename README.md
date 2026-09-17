@@ -29,6 +29,8 @@ Set these GitHub secrets and variables before running it:
 - `OCTOPUS_API_KEY` - an Octopus API key
 - `OCTOPUS_SPACE` - the Octopus space name or ID
 
+If any of those values are not configured, the workflow logs a warning and skips the Octopus push step instead of failing the entire run.
+
 ### 2. Approve a manual intervention
 
 The workflow at `.github/workflows/approve-octopus-change.yml` runs `scripts/approve_octopus_change.py` to approve or reject a pending Octopus manual intervention task.
