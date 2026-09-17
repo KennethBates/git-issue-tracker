@@ -1,0 +1,35 @@
+name: Push build information to Octopus
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  push-build-information:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute sample package version
+        id: version
+        shell: bash
+        run: echo "value=1.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Push build information to Octopus Deploy
+        uses: OctopusDeploy/push-build-information-action@v4
+        with:
+          server: ${{ secrets.OCTOPUS_URL }}
+          api_key: ${{ secrets.OCTOPUS_API_KEY }}
+          space: ${{ vars.OCTOPUS_SPACE }}
+          packages: |
+            git-issue-tracker
+          version: ${{ steps.version.outputs.value }}
+          overwrite_mode: OverwriteExisting

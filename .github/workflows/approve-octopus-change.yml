@@ -1,0 +1,45 @@
+name: Approve Octopus change
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: Octopus task ID to approve or reject
+        required: true
+        type: string
+      action:
+        description: proceed approves the intervention, abort rejects it
+        required: true
+        default: proceed
+        type: choice
+        options:
+          - proceed
+          - abort
+      notes:
+        description: Optional approval notes
+        required: false
+        type: string
+      space_id:
+        description: Optional Octopus space ID override
+        required: false
+        type: string
+
+jobs:
+  approve-change:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Submit Octopus manual intervention
+        env:
+          OCTOPUS_URL: ${{ secrets.OCTOPUS_URL }}
+          OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+          OCTOPUS_SPACE_ID: ${{ inputs.space_id || vars.OCTOPUS_SPACE_ID }}
+          OCTOPUS_TASK_ID: ${{ inputs.task_id }}
+          OCTOPUS_ACTION: ${{ inputs.action }}
+          OCTOPUS_NOTES: ${{ inputs.notes }}
+        run: python scripts/approve_octopus_change.py
